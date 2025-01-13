@@ -78,7 +78,7 @@ def calculateOutput(valsIn, net):
 
     l1 = tanhArray(tanhArray(np.matmul(net["w1"], valsIn))) # first hidden layer
     l2 = tanhArray(tanhArray(np.matmul([l1], net["w2"])))[0] # second hidden layer
-    valsOut = ReLU(tanhArray(tanhArray(np.matmul([l2], net["w3"])))[0]) # output
+    valsOut = ReLU(tanhArray(np.matmul([l2], net["w3"]))[0]) # output
     
     return valsOut
 
