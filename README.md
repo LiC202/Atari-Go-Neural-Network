@@ -64,9 +64,19 @@ Anyway...
 
 I have an input matrix `valsIn`, multiplied by the first weight matrix `w1`, which I apply two `tanh` squashing functions to, and that gives me my first hidden layer `l1`.
 Repeat using `l1` as the input, `w2` for the weights, and get an output of `l2`.
-Finally I take `l2` and multiply it by `w3`, apply my two sigmoid `tanh` functions, and then a `ReLU` on top of all of that to discard any negative results (not actually necessary for this project at all).
-This is now an 82 item long list, where indeces 0-80 are positions on the board, and 81 is pass.
-All the values are some x, 0 <= x <= 1.
+Finally I take `l2` and multiply it by `w3`, apply one sigmoid `tanh` function, and then a `ReLU` on top of all of that to discard any negative results (not actually necessary for this project at all).
+I understand that this process is usually done iteratively, but I'm really going into this blind so I'm happy to make mistakes like this, afterall at this stage all I want is for something to go from playing 100% randomly, to making a decision, however bad it is.
+```
+def calculateOutput(valsIn, net):
+    
+    l1 = tanhArray(tanhArray(np.matmul(net["w1"], valsIn))) # first hidden layer
+    l2 = tanhArray(tanhArray(np.matmul([l1], net["w2"])))[0] # second hidden layer
+    valsOut = ReLU(tanhArray(np.matmul([l2], net["w3"]))[0]) # output
+    
+    return valsOut
+```
+This returns an 82 item long list, where indeces 0-80 represent positions on the board, and index 81 is a pass.
+All the values are some x, where 0 <= x <= 1. The greatest of these values will be the submitted move.
 
 # Gen-Alg
 
