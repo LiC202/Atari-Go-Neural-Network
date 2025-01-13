@@ -1,4 +1,6 @@
 from constants import *
+from score_counter import *
+from neural_net import *
 import pygame
 
 # DRAW BOARD
@@ -19,8 +21,8 @@ def displayBoardstate(win, board):
 
 def checkCaptures(board, turn):
     
-    def countLiberties(board, col, row, already_checked, group):
-        already_checked.append((col, row))
+    def countLiberties(board, col, row, alreadyChecked, group):
+        alreadyChecked.append((col, row))
         group.append((col, row))
         colour = board[col][row]
         liberties = 0
@@ -28,34 +30,37 @@ def checkCaptures(board, turn):
         if col-1 >= 0:
             if (col-1, row) not in group:
                 if board[col-1][row] == "+": liberties += 1
-                elif board[col-1][row] == colour: liberties += countLiberties(board, col-1, row, already_checked, group)
+                elif board[col-1][row] == colour: liberties += countLiberties(board, col-1, row, alreadyChecked, group)
         if col+1 <= 8:
             if (col+1, row) not in group:
                 if board[col+1][row] == "+": liberties += 1
-                elif board[col+1][row] == colour: liberties += countLiberties(board, col+1, row, already_checked, group)
+                elif board[col+1][row] == colour: liberties += countLiberties(board, col+1, row, alreadyChecked, group)
         if row-1 >= 0:
             if (col, row-1) not in group:
                 if board[col][row-1] == "+": liberties += 1
-                elif board[col][row-1] == colour: liberties += countLiberties(board, col, row-1, already_checked, group)
+                elif board[col][row-1] == colour: liberties += countLiberties(board, col, row-1, alreadyChecked, group)
         if row+1 <= 8:
             if (col, row+1) not in group:
                 if board[col][row+1] == "+": liberties += 1
-                elif board[col][row+1] == colour: liberties += countLiberties(board, col, row+1, already_checked, group)
+                elif board[col][row+1] == colour: liberties += countLiberties(board, col, row+1, alreadyChecked, group)
         return liberties
 
-    already_checked = []
+    alreadyChecked = []
     toCapture = []
     for col in range(COLS):
         for row in range(ROWS):
-            if (col, row) not in already_checked:
-                already_checked.append((col, row))
+            if (col, row) not in alreadyChecked:
+                alreadyChecked.append((col, row))
                 if board[col][row] == "X" or board[col][row] == "O":
                     group = []
-                    liberties = countLiberties(board, col, row, already_checked, group)
+                    liberties = countLiberties(board, col, row, alreadyChecked, group)
                     if liberties == 0: toCapture.append(group)
 
     if len(toCapture) == 1: # only one group
-        for pos in toCapture[0]: board[pos[0]][pos[1]] = "+" if len(toCapture[0]) != 1 else "F"
+        for pos in toCapture[0]:
+            board[pos[0]][pos[1]] = "+" if len(toCapture[0]) != 1 else "F"
+            if toCapture[0][0] == "O": blackCaps += len(toCapture[0])
+            elif toCapture[0][0] == "X": whiteCaps += len(toCapture[0])
     
     elif len(toCapture) > 1: # multiple groups
         colours = []
@@ -64,7 +69,10 @@ def checkCaptures(board, turn):
         
         if len(colours) == 1: # different groups of same colour
             for group in toCapture:
-                for pos in group: board[pos[0]][pos[1]] = "+" if len(group) != 1 else "F"
+                for pos in group:
+                    board[pos[0]][pos[1]] = "+" if len(group) != 1 else "F"
+                    if group[0] == "O": blackCaps += len(group)
+                    elif group[0] == "X": whiteCaps += len(group)
         
         else: # different groups of different colours
             for group in toCapture:
@@ -72,7 +80,10 @@ def checkCaptures(board, turn):
                 if board[group[0][0]][group[0][1]] == c:
                     toCapture.remove(group)
             for group in toCapture:
-                for pos in group: board[pos[0]][pos[1]] = "+" if len(group) != 1 else "F"
+                for pos in group:
+                    board[pos[0]][pos[1]] = "+" if len(group) != 1 else "F"
+                    if group[0] == "O": blackCaps += len(group)
+                    elif group[0] == "X": whiteCaps += len(group)
 
 def drawPiece(win, c, x, y):
     colour = BLACK if c == "X" else WHITE
@@ -119,7 +130,14 @@ def main():
     clock = pygame.time.Clock()
     displayGoban(win)
     board = [["+" for _ in range(COLS)] for _ in range (ROWS)] # empty 2d array "board"
+    
     turn = 0
+    passes = 0
+    score = False
+    global blackCaps
+    global whiteCaps
+    blackCaps = 0
+    whiteCaps = 0
 
     while run: # UPDATE
         clock.tick(FPS)
@@ -131,6 +149,7 @@ def main():
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN: # CLICK
+                passes = 0
                 pos = pygame.mouse.get_pos()
                 xpos = pos[0]//SQUARE_SIZE
                 ypos = pos[1]//SQUARE_SIZE
@@ -144,13 +163,24 @@ def main():
                     turn += 1
                     addFlags(board, turn)
                     show(board)
-            
+
+            if event.type == pygame.KEYDOWN: # SPACE BAR
+                if event.key == pygame.K_SPACE: # pass
+                    removeFlags(board)
+                    passes += 1
+                    if passes == 2:
+                        run = False
+                        score = True
+                    else:
+                        turn += 1
+                        addFlags(board, turn)
+
+        print(board)
         displayBoardstate(win, board)
+
+    if score == True:
+        scoreGame(board, blackCaps, whiteCaps)
 
     pygame.quit()
 
 main()
-
-# 405 nodes
-# 26244 edges
-# = total of 26649 values
