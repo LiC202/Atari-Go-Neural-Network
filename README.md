@@ -36,17 +36,17 @@ Next, if there is only one group to capture then it captures it, if there are tw
 The neural net is really what I was most excited to work on, closely followed by the gen alg.
 
 Step one is defining my inputs and my outputs:
- - 162 inputs
-   - Wether a spot on the board is a legal move (0 or 1)
-   - Whether the piece is my colour or the opponent's colour (-1 or 1)
+ - 81 inputs
+   - One for each space on the board (-1 for opponent's colour, 1 for own colour)
  - 81 outputs
    - One for each space on the board
+   - This would later be collapsed into one MOST preferred move
 
 Next I had to decide how many hidden layers I would need, and how large they would be.
 For this I decided on two hidden layers, each of 81 nodes.
 This step is really always arbitrary, but maybe later with more experience I could say if this is too little or too much complexity.
-Even with this number of nodes (405) there are 26244 different parameters for the neural net to play with.
-I chose not to use biases on each node just because this is the first time I've ever done anything with AI or neural nets, and since the only library I'm using is numpy I thought best not make it too difficult for me to grasp.
+Even with this number of nodes (324) there are 19683 different parameters for the neural net to play with.
+I chose not to use biases on each node just because this is the first time I've ever done anything with AI or neural nets, and since the only library I'm using is numpy I thought best not make it too difficult for me to grasp (I'm now realising this really wouldn't've been hard to implement).
 Writing this I'm half-way through the project and I'm realising that Go and neural nets with genetic algorithms was a terrible combination, the nature of there being changing number of available outputs (ideally, I don't know how NEAT works yet either) makes this very tough.
 Next time I'll make a more complex network for a simpler game, that way I can learn the basics of neural nets easier.
 
@@ -70,7 +70,14 @@ All the values are some x, where 0 <= x <= 1. The greatest of these values will 
 
 # Genetic-Algorithm
 
-[YET TO WRITE]
+This is where it all goes wrong...
+
+First of all, I should mention I did want to use a back-propagation, but this would require
+
+
+
+
+
 
 
 
